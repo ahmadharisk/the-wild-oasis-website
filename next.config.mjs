@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  images: {
+    remotePatterns: [new URL('https://ctomqrdyoiujkiqgmsta.supabase.co/storage/v1/object/public/cabin-images/**')]
+  },
+  // output: "export"
+};
 
 export default nextConfig;
