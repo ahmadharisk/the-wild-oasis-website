@@ -1,5 +1,5 @@
 import {ArrowRightOnRectangleIcon} from '@heroicons/react/24/solid';
-import {signOutAction} from "@/app/_lib/action";
+import {signOutAction} from "@/app/_lib/actions";
 
 function SignOutButton() {
   return (
