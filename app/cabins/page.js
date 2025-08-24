@@ -13,7 +13,8 @@ export const metadata = {
 
 export default async function Page(
   {searchParams}) {
-  const filter = await searchParams?.capacity ?? "all";
+  const {capacity} = await searchParams;
+  const filter = capacity ?? "all";
 
   return (
     <div>

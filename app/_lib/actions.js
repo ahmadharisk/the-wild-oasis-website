@@ -1,9 +1,33 @@
 "use server";
 
 import {auth, signIn, signOut} from "@/app/_lib/auth";
-import {deleteBooking, getBookings, updateBooking, updateGuest} from "@/app/_lib/data-service";
+import {createBooking, deleteBooking, getBookings, updateBooking, updateGuest} from "@/app/_lib/data-service";
 import {revalidatePath} from "next/cache";
 import {redirect} from "next/navigation";
+
+export async function createReservation(bookingData, formData) {
+  const session = await auth();
+
+  if (!session) {
+    throw new Error("Not logged in");
+  }
+
+  const newBookingData = {
+    ...bookingData,
+    guestId: session.user.guestId,
+    numGuests: formData.get("numGuests"),
+    observations: formData.get("observations").slice(0, 1000),
+    extrasPrice: 0,
+    totalPrice: bookingData.cabinPrice,
+    isPaid: false,
+    hasBreakfast: false,
+    status: "unconfirmed",
+  }
+
+  await createBooking(newBookingData);
+  revalidatePath(`/cabins/${bookingData.cabinId}`)
+  redirect("/cabins/thankyou")
+}
 
 export async function updateReservation(formData) {
   const session = await auth();

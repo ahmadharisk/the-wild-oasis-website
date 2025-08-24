@@ -1,11 +1,31 @@
 "use client"
 
 import {useReservationContext} from "@/app/_components/ReservationContext";
+import {differenceInDays} from "date-fns";
+import {createReservation} from "@/app/_lib/actions";
+import Button from "@/app/_components/Button";
+import SubmitButton from "@/app/_components/SubmitButton";
 
 function ReservationForm({cabin, user}) {
   // CHANGE
-  const {maxCapacity} = cabin;
-  const {range} = useReservationContext();
+  const {maxCapacity, regularPrice, discount, id} = cabin;
+  const {range, resetRange} = useReservationContext();
+
+  const startDate = range.from;
+  const endDate = range.to;
+
+  const numNights = differenceInDays(endDate, startDate);
+  const cabinPrice = numNights * (regularPrice - discount);
+
+  const bookingData = {
+    startDate,
+    endDate,
+    numNights,
+    cabinPrice,
+    cabinId: id
+  }
+
+  const createBookingWithData = createReservation.bind(null, bookingData);
 
   return (
     <div className='scale-[1.01]'>
@@ -24,7 +44,13 @@ function ReservationForm({cabin, user}) {
         </div>
       </div>
 
-      <form className='bg-primary-900 py-10 px-4 text-lg flex gap-5 flex-col'>
+      <form
+        // action={createBookingWithData}
+        action={async (formData) => {
+          await createBookingWithData(formData);
+          resetRange();
+        }}
+        className='bg-primary-900 py-10 px-4 text-lg flex gap-5 flex-col'>
         <div className='space-y-2'>
           <label htmlFor='numGuests'>How many guests?</label>
           <select
@@ -36,7 +62,7 @@ function ReservationForm({cabin, user}) {
             <option value='' key=''>
               Select number of guests...
             </option>
-            {Array.from({ length: maxCapacity }, (_, i) => i + 1).map((x) => (
+            {Array.from({length: maxCapacity}, (_, i) => i + 1).map((x) => (
               <option value={x} key={x}>
                 {x} {x === 1 ? 'guest' : 'guests'}
               </option>
@@ -57,11 +83,14 @@ function ReservationForm({cabin, user}) {
         </div>
 
         <div className='flex justify-end items-center gap-6'>
-          <p className='text-primary-300 text-base'>Start by selecting dates</p>
-
-          <button className='bg-accent-500 px-8 py-4 text-primary-800 font-semibold hover:bg-accent-600 transition-all disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-300'>
-            Reserve now
-          </button>
+          {!(startDate && endDate) ?
+            <p className='text-primary-300 text-base'>Start by selecting dates</p>
+            : <SubmitButton
+              pendingLabel={"loading..."}
+            >
+              Reserve Now
+            </SubmitButton>
+          }
         </div>
       </form>
     </div>
